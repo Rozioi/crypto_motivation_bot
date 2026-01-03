@@ -10,4 +10,10 @@ db.exec(`
     role TEXT NOT NULL DEFAULT 'user',
     createdAt TEXT
   );
+  CREATE TABLE IF NOT EXISTS access (
+    telegramId INTEGER PRIMARY KEY,
+    paymentId TEXT,
+    access INTEGER,
+    updatedAt TEXT
+  );
 `);
