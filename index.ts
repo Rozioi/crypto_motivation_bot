@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import { session } from "grammy";
 import { conversations, createConversation } from "@grammyjs/conversations";
+import { UserRepo } from "./src/db/repositories/user.repo";
 type Sponsor = {
   name: string;
   username: string;
@@ -41,6 +42,17 @@ async function isSubscribed(ctx) {
   }
 }
 
+function createUser(ctx) {
+  try {
+    const res = UserRepo.createUser(ctx.from.id, ctx.from.username, "member");
+    console.log(res);
+    if (!res) {
+    }
+  } catch (err) {
+    console.error("Error in process creating user, problem:", err);
+  }
+}
+
 function sponsorsKeyboard() {
   const kb = new InlineKeyboard();
 
@@ -71,11 +83,12 @@ bot.command("start", async (ctx) => {
   );
 });
 bot.command("addsponsor", async (ctx) => {
-  const [username] = ctx.message.text.split(" ");
+  const [, username] = ctx.message.text.split(" ");
   sponsors.push({ name: username.replace("@", ""), username });
+  console.log(sponsors, username);
   await ctx.reply("✅ Спонсор добавлен");
 });
-bot.command("pay", async (ctx) => {
+bot.callbackQuery("pay", async (ctx) => {
   const invoice = await PaymentService.createInvoice(
     200,
     "TRX",
@@ -92,7 +105,7 @@ bot.command("pay", async (ctx) => {
   );
 });
 
-bot.command("check", async (ctx) => {
+bot.callbackQuery("check", async (ctx) => {
   const record = await AccessRepo.get(ctx.from.id);
 
   if (!record) {
